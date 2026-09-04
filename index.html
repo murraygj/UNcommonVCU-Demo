@@ -220,8 +220,8 @@ input{font-family:inherit}
 .board{
   position:relative;width:100%;
   aspect-ratio:1/1.05;
-  max-height:min(40vh,340px);
-  max-height:min(34svh,340px);
+  max-height:min(52vh,420px);
+  max-height:min(48svh,420px);
   min-height:170px;
 }
 .peg{
@@ -596,13 +596,21 @@ input{font-family:inherit}
   .drop-head{margin-bottom:11px}
   .drop-head .era-mark{font-size:clamp(1.35rem,6.4vw,1.7rem)}
   .drop-head p{font-size:.8rem}
-  .board-frame{padding:10px 10px;margin-bottom:14px}
-  .board{max-height:min(30svh,280px);min-height:150px}
-  .aim{padding-bottom:6px}
+  .board-frame{padding:10px 10px;margin-bottom:13px}
+  .board{max-height:min(50svh,400px);min-height:160px}
+  .aim{padding-bottom:5px}
   .aim-track{height:22px}
+  .slot{padding:7px 0 6px}
   .intro-era{font-size:clamp(1.9rem,9vw,2.5rem)}
   .beat{padding:10px 12px;font-size:.83rem}
-  .modal-card{padding-top:16px;padding-bottom:20px}
+  .modal-card{padding-top:14px;padding-bottom:18px}
+}
+
+/* very short — landscape phones, small devices */
+@media(max-height:600px){
+  .board{max-height:min(46svh,300px)}
+  .drop-head .era-mark{font-size:1.3rem}
+  .drop-head p{display:none}
 }
 
 /* leave room under the app for mobile browser chrome */
