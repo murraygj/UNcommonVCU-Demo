@@ -559,6 +559,9 @@ input{font-family:inherit}
 .chk-row{display:flex;gap:7px}
 .chk-row .field{margin:0;flex:1;min-width:0;text-transform:uppercase;letter-spacing:.1em;font-weight:800}
 .chk-row .btn{width:auto;flex-shrink:0;padding:15px 17px;font-size:.85rem}
+.tixbtn{text-decoration:none;text-align:center}
+.tixnote{font-size:.72rem;color:var(--faint);margin-top:10px;line-height:1.5}
+.chk.clicked{border-style:solid;border-color:var(--win);background:rgba(27,174,85,.06)}
 
 /* ── results ── */
 
@@ -786,13 +789,11 @@ input{font-family:inherit}
       <button class="btn" id="submitBtn" disabled>Pick all three to lock in</button>
       <p class="note" id="note">Sweep all three and you get a 15-point bonus.</p>
 
-      <div class="chk" id="chk">
-        <p class="chk-t">Game night check-in</p>
-        <p class="chk-s" id="chkSub">A code goes up on the videoboard at the under-8 timeout. Worth 25 points, and you have to be in the building.</p>
-        <div class="chk-row" id="chkRow" style="display:none">
-          <input class="field" id="code" placeholder="Code" maxlength="8">
-          <button class="btn" id="codeBtn">Check in</button>
-        </div>
+      <div class="chk" id="tix">
+        <p class="chk-t">Going?</p>
+        <p class="chk-s">Student tickets are free. Everyone else starts around $12.</p>
+        <a class="btn tixbtn" id="tixBtn" href="#" role="button">Get a ticket</a>
+        <p class="tixnote" id="tixNote">Clicks on this link are the tracked action \u2014 that is how we measure whether any of this moves anyone into the building.</p>
       </div>
     </div>
 
@@ -825,7 +826,6 @@ input{font-family:inherit}
 
 var ROWS = 8;
 var VALUES = [1000, 600, 400, 250, 150, 250, 400, 600, 1000];
-var CODE = 'RAMS12';
 var FIELD_SIZE = 47;
 
 var MARKETS = [
@@ -865,7 +865,7 @@ var RIVALS = [
   {n:'aliyah_v',p:960},{n:'westofbroad',p:815},{n:'cary.st.carter',p:640},{n:'nsimmons',p:430}
 ];
 
-var S = { bal:0, picks:{}, locked:false, resolved:false, checked:false, aim:8, streak:0 };
+var S = { bal:0, picks:{}, locked:false, resolved:false, aim:8, streak:0 };
 var $ = function(i){ return document.getElementById(i); };
 var pct = function(h){ return 4 + (h/16)*92; };
 
@@ -1116,7 +1116,6 @@ function resolve(){
     lines.push({ n:m.n, hit:hit, w:m.w });
   });
   if (right === 3){ lines.push({ n:'Sweep bonus', hit:true, w:15 }); earned += 15; }
-  if (S.checked){ lines.push({ n:'Checked in at the Siegel Center', hit:true, w:25 }); earned += 25; }
 
   var t = $('tally'); t.innerHTML = '';
   lines.forEach(function(l){
@@ -1133,7 +1132,6 @@ function resolve(){
   $('earned').textContent = '+' + earned;
   $('resSec').style.display = 'block';
   $('simBtn').style.display = 'none';
-  $('chk').style.display = 'none';
 
   S.bal += earned;
   renderMarkets(); refreshSubmit(); renderBoard(true);
@@ -1179,24 +1177,19 @@ $('submitBtn').addEventListener('click', function(){
   S.locked = true;
   renderMarkets(); refreshSubmit();
   $('simBtn').style.display = 'block';
-  $('chk').classList.add('armed');
-  $('chkSub').textContent = 'Tonight\u2019s code is ' + CODE + '. On the live site you\u2019d only get this in the building.';
-  $('chkRow').style.display = 'flex';
+  $('tix').classList.add('armed');
 });
 
-$('codeBtn').addEventListener('click', function(){
-  if ($('code').value.trim().toUpperCase() !== CODE){ $('code').style.borderColor = 'var(--rust)'; return; }
-  S.checked = true;
-  $('chk').className = 'chk done';
-  $('chkSub').textContent = 'Checked in. 25 points land when the game resolves.';
-  $('chkRow').style.display = 'none';
+$('tixBtn').addEventListener('click', function(e){
+  e.preventDefault();
+  $('tix').classList.add('clicked');
+  $('tixNote').textContent = 'Click recorded. On the live site this would carry a UTM and open the VCU ticket page.';
 });
-$('code').addEventListener('input', function(){ this.style.borderColor = ''; });
 
 $('simBtn').addEventListener('click', resolve);
 
 $('resetBtn').addEventListener('click', function(){
-  S = { bal:0, picks:{}, locked:false, resolved:false, checked:false, aim:8, streak:0 };
+  S = { bal:0, picks:{}, locked:false, resolved:false, aim:8, streak:0 };
   $('app').classList.remove('on');
   $('backdrop').style.display = '';
   $('modal').classList.remove('gone');
@@ -1209,10 +1202,9 @@ $('resetBtn').addEventListener('click', function(){
   $('board').style.pointerEvents = '';
   $('aimLbl').textContent = 'DRAG TO AIM';
   $('aimLbl').classList.remove('hot');
-  $('email').value = ''; $('code').value = '';
-  $('chk').className = 'chk'; $('chk').style.display = 'block';
-  $('chkSub').textContent = 'A code goes up on the videoboard at the under-8 timeout. Worth 25 points, and you have to be in the building.';
-  $('chkRow').style.display = 'none';
+  $('email').value = '';
+  $('tix').className = 'chk';
+  $('tixNote').textContent = 'Clicks on this link are the tracked action \u2014 that is how we measure whether any of this moves anyone into the building.';
   $('resSec').style.display = 'none';
   $('simBtn').style.display = 'none';
   $('bhList').classList.remove('open');
