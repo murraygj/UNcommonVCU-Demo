@@ -25,19 +25,26 @@
   --win:#1BAE55;
 }
 
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 
-html{-webkit-text-size-adjust:100%}
+html{
+  -webkit-text-size-adjust:100%;
+  background:#000;
+  min-height:100%;
+}
 body{
   font-family:'Archivo',system-ui,-apple-system,sans-serif;
-  background:var(--black);
+  background:#000;
   color:var(--gray);
   font-size:16px;line-height:1.5;
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
+  min-height:100vh;
+  min-height:100svh;
 }
+#app{background:#000}
 
-button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;touch-action:manipulation}
 input{font-family:inherit}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
 
@@ -513,6 +520,28 @@ input{font-family:inherit}
 .mkt-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .mkt-n{font-size:1.1rem;font-weight:900;font-stretch:86%;color:var(--white);letter-spacing:-.02em}
 .mkt-w{font-size:.68rem;font-weight:900;color:var(--gold);white-space:nowrap}
+.mkt-right{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.conv{
+  font-size:.82rem;font-weight:900;
+  padding:5px 10px;border-radius:99px;
+  border:1px solid var(--line-hi);
+  background:var(--s2);color:var(--muted);
+  line-height:1;transition:all 150ms;
+  font-variant-numeric:tabular-nums;
+}
+@media (hover:hover){
+  .conv:hover:not(.static){border-color:var(--gold);color:var(--gold)}
+}
+.conv.c3{background:var(--gold);border-color:var(--gold);color:#000}
+.conv.c2{border-color:var(--gold-dim);color:var(--gold)}
+.conv.static{cursor:default}
+.convhint{font-size:.77rem;color:var(--muted);margin-bottom:11px;line-height:1.5}
+.convhint b{color:var(--gold);font-weight:800}
+.underdog{
+  display:inline-block;font-size:.6rem;font-weight:900;
+  letter-spacing:.08em;color:#000;background:var(--gold);
+  padding:2px 6px;border-radius:99px;margin-left:7px;vertical-align:middle;
+}
 .mkt-q{font-size:.83rem;color:var(--muted);margin:5px 0 12px;line-height:1.45}
 
 .opts{display:grid;gap:7px;grid-template-columns:1fr 1fr}
@@ -522,10 +551,12 @@ input{font-family:inherit}
   padding:12px 13px;border-radius:4px;
   background:var(--s2);border:1px solid var(--line);
   text-align:left;font-size:.87rem;font-weight:700;color:var(--gray);
-  transition:all 140ms;
+  transition:background-color 130ms ease, border-color 130ms ease, color 130ms ease;
   display:flex;flex-direction:column;gap:3px;min-height:46px;justify-content:center;
 }
-.opt:hover:not(.static){border-color:var(--line-hi);background:var(--s3)}
+@media (hover:hover){
+  .opt:hover:not(.static):not(.sel){border-color:var(--line-hi);background:var(--s3)}
+}
 .opt.sel{background:var(--gold);border-color:var(--gold);color:#000;font-weight:900}
 .opt.static{cursor:default}
 .opt-meta{font-size:.66rem;font-weight:800;letter-spacing:.05em;opacity:.85}
@@ -785,9 +816,11 @@ input{font-family:inherit}
     <!-- markets -->
     <div class="sec">
       <div class="sec-h"><span class="kicker">YOUR THREE CALLS</span></div>
+      <p class="convhint">Tap a multiplier to rank your conviction — <b>3×</b>, <b>2×</b>, <b>1×</b>, one each. Calls the crowd got wrong pay half again more. You never lose points.</p>
       <div id="markets"></div>
       <button class="btn" id="submitBtn" disabled>Pick all three to lock in</button>
       <p class="note" id="note">Sweep all three and you get a 15-point bonus.</p>
+      <p class="note" style="margin-top:4px;font-size:.72rem;color:#5E5E5E">Free to play. Points have no cash value and can never go down.</p>
 
       <div class="chk" id="tix">
         <p class="chk-t">Going?</p>
@@ -801,7 +834,7 @@ input{font-family:inherit}
     <div class="sec" id="resSec" style="display:none">
       <div class="sec-h"><span class="kicker">FINAL</span></div>
       <div class="res">
-        <p class="res-final">VCU 71, Virginia Tech 66 · 1,340 announced</p>
+        <p class="res-final">VCU 71, Virginia Tech 66 · 2,410 announced</p>
         <h2 class="res-head" id="resHead">You went 0 for 3.</h2>
         <div class="tally" id="tally"></div>
         <div class="tally-sum">
@@ -852,8 +885,8 @@ var MARKETS = [
     q:'Announced attendance. The last home game drew 1,014.',
     opts:[
       {t:'Under 1,200',   win:false, split:38},
-      {t:'1,200\u20132,000', win:true,  split:35},
-      {t:'2,000\u20133,500', win:false, split:19},
+      {t:'1,200\u20132,000', win:false, split:35},
+      {t:'2,000\u20133,500', win:true,  split:19},
       {t:'Over 3,500',    win:false, split:8}
     ]
   }
@@ -865,8 +898,19 @@ var RIVALS = [
   {n:'aliyah_v',p:960},{n:'westofbroad',p:815},{n:'cary.st.carter',p:640},{n:'nsimmons',p:430}
 ];
 
-var S = { bal:0, picks:{}, locked:false, resolved:false, aim:8, streak:0 };
+var S = { bal:0, picks:{}, locked:false, resolved:false, aim:8, streak:0,
+          conv:{ call:3, number:2, room:1 } };
 var $ = function(i){ return document.getElementById(i); };
+
+function cycleConv(id){
+  var cur = S.conv[id];
+  var next = (cur === 3) ? 1 : cur + 1;
+  var other = Object.keys(S.conv).filter(function(k){ return S.conv[k] === next; })[0];
+  if (other) S.conv[other] = cur;
+  S.conv[id] = next;
+  paintConv(id);
+  if (other) paintConv(other);
+}
 var pct = function(h){ return 4 + (h/16)*92; };
 
 /* ─────── board ─────── */
@@ -982,17 +1026,53 @@ function land(slot){
 
 /* ─────── markets ─────── */
 
+var MKT_EL = {};
+
+function paintConv(id){
+  var refs = MKT_EL[id];
+  if (!refs) return;
+  var m = MARKETS.filter(function(x){ return x.id === id; })[0];
+  refs.conv.className = 'conv c' + S.conv[id] + ((S.locked || S.resolved) ? ' static' : '');
+  refs.conv.textContent = S.conv[id] + '\u00D7';
+  refs.pts.textContent = (m.w * S.conv[id]) + ' PTS';
+}
+
+function selectOpt(m, i){
+  S.picks[m.id] = i;
+  var refs = MKT_EL[m.id];
+  if (refs) refs.opts.forEach(function(b, j){
+    if (j === i) b.classList.add('sel');
+    else b.classList.remove('sel');
+  });
+  refreshSubmit();
+}
+
 function renderMarkets(){
   var wrap = $('markets');
   wrap.innerHTML = '';
+  MKT_EL = {};
 
   MARKETS.forEach(function(m){
     var card = el('div','mkt');
 
     var top = el('div','mkt-top');
     top.appendChild(txt(el('div','mkt-n'), m.n));
-    top.appendChild(txt(el('div','mkt-w'), m.w + ' PTS'));
+
+    var rightSide = el('div','mkt-right');
+    var conv = document.createElement('button');
+    conv.type = 'button';
+    conv.className = 'conv c' + S.conv[m.id];
+    conv.textContent = S.conv[m.id] + '×';
+    conv.setAttribute('aria-label', m.n + ' conviction ' + S.conv[m.id] + ' times');
+    if (S.locked || S.resolved) conv.classList.add('static');
+    else conv.addEventListener('click', function(){ cycleConv(m.id); });
+    rightSide.appendChild(conv);
+    var ptsEl = txt(el('div','mkt-w'), (m.w * S.conv[m.id]) + ' PTS');
+    rightSide.appendChild(ptsEl);
+    top.appendChild(rightSide);
     card.appendChild(top);
+
+    MKT_EL[m.id] = { conv:conv, pts:ptsEl, opts:[] };
     card.appendChild(txt(el('p','mkt-q'), m.q));
 
     var opts = el('div','opts');
@@ -1000,6 +1080,7 @@ function renderMarkets(){
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'opt';
+      MKT_EL[m.id].opts.push(b);
       b.appendChild(txt(document.createElement('span'), o.t));
       var meta = el('span','opt-meta');
       b.appendChild(meta);
@@ -1009,16 +1090,20 @@ function renderMarkets(){
 
       if (S.resolved){
         b.classList.add('static');
-        if (o.win){ b.classList.remove('sel'); b.classList.add('right'); meta.textContent = mine ? 'CORRECT — YOUR PICK' : 'CORRECT'; }
+        if (o.win){
+          b.classList.remove('sel'); b.classList.add('right');
+          meta.textContent = mine ? 'CORRECT — YOUR PICK' : 'CORRECT';
+          if (o.split < 25){
+            var ud = el('span','underdog'); ud.textContent = 'UNDERDOG';
+            meta.appendChild(ud);
+          }
+        }
         else if (mine){ b.classList.remove('sel'); b.classList.add('wrong'); meta.textContent = 'YOUR PICK'; }
       } else if (S.locked){
         b.classList.add('static');
         if (mine) meta.textContent = 'LOCKED IN';
       } else {
-        b.addEventListener('click', function(){
-          S.picks[m.id] = i;
-          renderMarkets(); refreshSubmit();
-        });
+        b.addEventListener('click', function(){ selectOpt(m, i); });
       }
       opts.appendChild(b);
     });
@@ -1057,9 +1142,11 @@ function txt(e, t){ e.textContent = t; return e; }
 function refreshSubmit(){
   var b = $('submitBtn'), n = Object.keys(S.picks).length;
   if (S.resolved){ b.style.display='none'; $('note').textContent = 'Next up: Saturday vs. Loyola Chicago.'; return; }
+  b.style.display = 'block';
   if (S.locked){ b.disabled = true; b.textContent = 'Picks are in'; $('note').textContent = 'Locked until tip.'; return; }
   b.disabled = (n < 3);
   b.textContent = (n < 3) ? ('Pick all three to lock in  (' + n + '/3)') : 'Lock in my picks';
+  $('note').textContent = 'Sweep all three and you get a 15-point bonus.';
 }
 
 /* ─────── board / rank ─────── */
@@ -1112,8 +1199,16 @@ function resolve(){
   MARKETS.forEach(function(m){
     var p = S.picks[m.id];
     var hit = (p !== undefined && m.opts[p].win);
-    if (hit){ earned += m.w; right++; }
-    lines.push({ n:m.n, hit:hit, w:m.w });
+    var mult = S.conv[m.id];
+    var label = m.n + '  ·  ' + mult + '×';
+    if (hit){
+      var pts = m.w * mult;
+      if (m.opts[p].split < 25){ pts = Math.round(pts * 1.5); label += '  ·  underdog'; }
+      earned += pts; right++;
+      lines.push({ n:label, hit:true, w:pts });
+    } else {
+      lines.push({ n:label, hit:false, w:0 });
+    }
   });
   if (right === 3){ lines.push({ n:'Sweep bonus', hit:true, w:15 }); earned += 15; }
 
@@ -1189,7 +1284,8 @@ $('tixBtn').addEventListener('click', function(e){
 $('simBtn').addEventListener('click', resolve);
 
 $('resetBtn').addEventListener('click', function(){
-  S = { bal:0, picks:{}, locked:false, resolved:false, aim:8, streak:0 };
+  S = { bal:0, picks:{}, locked:false, resolved:false, aim:8, streak:0,
+        conv:{ call:3, number:2, room:1 } };
   $('app').classList.remove('on');
   $('backdrop').style.display = '';
   $('modal').classList.remove('gone');
