@@ -819,7 +819,7 @@ input{font-family:inherit}
       <p class="convhint">Tap a multiplier to rank your conviction — <b>3×</b>, <b>2×</b>, <b>1×</b>, one each. Calls the crowd got wrong pay half again more. You never lose points.</p>
       <div id="markets"></div>
       <button class="btn" id="submitBtn" disabled>Pick all three to lock in</button>
-      <p class="note" id="note">Sweep all three and you get a 15-point bonus.</p>
+      <p class="note" id="note">Sweep all three and you get a 150-point bonus.</p>
       <p class="note" style="margin-top:4px;font-size:.72rem;color:#5E5E5E">Free to play. Points have no cash value and can never go down.</p>
 
       <div class="chk" id="tix">
@@ -858,12 +858,12 @@ input{font-family:inherit}
 'use strict';
 
 var ROWS = 8;
-var VALUES = [1000, 600, 400, 250, 150, 250, 400, 600, 1000];
+var VALUES = [2000, 1200, 800, 500, 300, 500, 800, 1200, 2000];
 var FIELD_SIZE = 47;
 
 var MARKETS = [
   {
-    id:'call', n:'The Call', w:10,
+    id:'call', n:'The Call', w:100,
     q:'How does it finish? Being right about a close loss still counts.',
     opts:[
       {t:'VCU by 10+',      win:false, split:14},
@@ -873,7 +873,7 @@ var MARKETS = [
     ]
   },
   {
-    id:'number', n:'The Number', w:10,
+    id:'number', n:'The Number', w:100,
     q:'Banbury\u2019s teams move the ball. VCU assists \u2014 over or under 14?',
     opts:[
       {t:'Over 14',  win:true,  split:58},
@@ -881,7 +881,7 @@ var MARKETS = [
     ]
   },
   {
-    id:'room', n:'The Room', w:15,
+    id:'room', n:'The Room', w:100,
     q:'Announced attendance. The last home game drew 1,014.',
     opts:[
       {t:'Under 1,200',   win:false, split:38},
@@ -893,9 +893,9 @@ var MARKETS = [
 ];
 
 var RIVALS = [
-  {n:'dtwelve',p:2140},{n:'monroepark_mel',p:1885},{n:'RamsSince91',p:1720},
-  {n:'j.okonkwo',p:1455},{n:'blackandgold_b',p:1290},{n:'shockoe.sam',p:1105},
-  {n:'aliyah_v',p:960},{n:'westofbroad',p:815},{n:'cary.st.carter',p:640},{n:'nsimmons',p:430}
+  {n:'dtwelve',p:4200},{n:'monroepark_mel',p:3600},{n:'RamsSince91',p:3150},
+  {n:'j.okonkwo',p:2800},{n:'blackandgold_b',p:2450},{n:'shockoe.sam',p:2100},
+  {n:'aliyah_v',p:1750},{n:'westofbroad',p:1400},{n:'cary.st.carter',p:1050},{n:'nsimmons',p:700}
 ];
 
 var S = { bal:0, picks:{}, locked:false, resolved:false, aim:8, streak:0,
@@ -1146,7 +1146,7 @@ function refreshSubmit(){
   if (S.locked){ b.disabled = true; b.textContent = 'Picks are in'; $('note').textContent = 'Locked until tip.'; return; }
   b.disabled = (n < 3);
   b.textContent = (n < 3) ? ('Pick all three to lock in  (' + n + '/3)') : 'Lock in my picks';
-  $('note').textContent = 'Sweep all three and you get a 15-point bonus.';
+  $('note').textContent = 'Sweep all three and you get a 150-point bonus.';
 }
 
 /* ─────── board / rank ─────── */
@@ -1210,7 +1210,7 @@ function resolve(){
       lines.push({ n:label, hit:false, w:0 });
     }
   });
-  if (right === 3){ lines.push({ n:'Sweep bonus', hit:true, w:15 }); earned += 15; }
+  if (right === 3){ lines.push({ n:'Sweep bonus', hit:true, w:150 }); earned += 150; }
 
   var t = $('tally'); t.innerHTML = '';
   lines.forEach(function(l){
